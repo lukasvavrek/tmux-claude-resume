@@ -1,0 +1,25 @@
+#!/bin/sh
+# Bring Claude Code sessions back into the right tmux panes after a restart.
+#
+#   tmux-claude-resume hook   Claude Code SessionStart hook: tag the pane with its session id
+#   tmux-claude-resume save   tmux-resurrect post-save hook: snapshot pane address -> session id
+#   tmux-claude-resume        tmux-resurrect restore command: resume this pane's session
+
+MAP="${TMUX_CLAUDE_RESUME_MAP:-$HOME/.claude/tmux-panes.tsv}"
+ADDR='#{session_name}:#{window_index}.#{pane_index}'
+TAB=$(printf '\t')
+
+case "$1" in
+  hook)
+    sid=$(sed -n 's/.*"session_id" *: *"\([^"]*\)".*/\1/p')
+    [ -n "$TMUX_PANE" ] && [ -n "$sid" ] && tmux set -p -t "$TMUX_PANE" @claude_sid "$sid"
+    exit 0 ;; # never block Claude startup
+  save)
+    tmux list-panes -a -F "$ADDR$TAB#{@claude_sid}" > "$MAP" ;;
+  *)
+    addr=$(tmux display -p -t "$TMUX_PANE" "$ADDR")
+    sid=$(awk -F "$TAB" -v a="$addr" '$1 == a { print $2 }' "$MAP" 2>/dev/null)
+    # ponytail: original claude flags are dropped, forward them with resurrect's `%` token if anyone needs it
+    [ -n "$sid" ] && exec claude --resume "$sid"
+    exec claude --continue ;;
+esac
