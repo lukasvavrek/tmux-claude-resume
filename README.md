@@ -14,6 +14,22 @@ One POSIX shell script, no dependencies beyond tmux and Claude Code.
 
 ## Install
 
+### Via agent
+
+Paste this into Claude Code (or any coding agent with shell access):
+
+```text
+Install tmux-claude-resume from https://github.com/lukasvavrek/tmux-claude-resume by following its README.
+- Clone it to ~/.tmux-claude-resume and put the script on my PATH.
+- Install TPM if ~/.tmux/plugins/tpm is missing.
+- Merge the config into my existing ~/.tmux.conf and ~/.claude/settings.json, never overwrite them.
+  If @resurrect-processes or a SessionStart hook already exists, add to it.
+- Validate settings.json with jq afterwards.
+- Don't reload tmux yourself. Tell me to run `tmux source ~/.tmux.conf` and press prefix + I.
+```
+
+### Manually
+
 ```sh
 git clone https://github.com/lukasvavrek/tmux-claude-resume ~/.tmux-claude-resume
 ln -s ~/.tmux-claude-resume/tmux-claude-resume /usr/local/bin/   # or anywhere on PATH
